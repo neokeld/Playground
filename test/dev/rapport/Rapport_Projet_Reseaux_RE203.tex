@@ -1,0 +1,51 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[top=3cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage[french,ruled]{algorithm2e}
+
+\pagestyle{fancy}
+\lhead{Rapport du projet réseaux RE203}
+\rhead{Informatique 2A}
+\renewcommand{\headrulewidth}{1px}
+\lfoot{\bsc{Enseirb-Matmeca}}
+\rfoot{\bsc{2ème année}}
+\renewcommand{\footrulewidth}{1px}
+
+%%%%%%%%%%%%%%%% Variables %%%%%%%%%%%%%%%%
+\def\projet{Rapport du projet réseaux RE203}
+\def\membres{Youssef BELBACHIR, Abderrahman BENTALEB, Benjamin BOUGOT, Arnaud DUFORAT,\\ Sébastien LAXALDE}
+\def\annee{2ème année}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%
+  \begin{figure}[h!]
+		\begin{center}
+                        \fbox{\begin{tabular}{l}
+                            {\bfseries \sffamily
+                              \projet} \\
+                            {\bfseries \sffamily
+                              Membres :} \membres \\ 
+                        \end{tabular}}
+			\title{
+			\Huge Projet Réseaux RE203: \\Simulation d'un réseau de routeurs}                     
+			\maketitle
+         \includegraphics[scale=0.5]{logo-enseirb.jpg}\\
+			ENSEIRB-MATMECA\\
+			1 Avenue du docteur Albert Schweitzer \\
+			33402 Talence Cedex\\
+                        \noindent    
+                        \vskip 0mm
+                        \noindent
+                        \vskip 4mm ~
+		\end{center}
+  \end{figure}  
+\newpage
+\tableofcontents
+\newpage
+\input{Text}
+\end{document}

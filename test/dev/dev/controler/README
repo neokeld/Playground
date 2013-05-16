@@ -1,0 +1,11 @@
+Pour compiler :
+make mrproper
+make
+cd ../client
+gcc client.c -Wall -pedantic -o client
+
+Pour tester :
+On lance dans un premier terminal 1 controler : ./controler
+Et ensuite des routeurs en java qui sont disponibles dans le répertoire /dev
+
+Pour couper le controler : quit

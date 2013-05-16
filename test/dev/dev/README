@@ -1,0 +1,6 @@
+Pour compiler :
+javac *.java
+
+Pour exécuter :
+java Routeur N1
+(avec N1 le nom du routeur)

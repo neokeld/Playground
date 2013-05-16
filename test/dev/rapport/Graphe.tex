@@ -1,0 +1,42 @@
+\section{Graphe}
+\paragraph{}Afin de respecter notre choix d'implémentation du contrôleur en langage C, nous avons également choisi ce langage pour réaliser le graphe. Nous avons décidé de représenter ce graphe sous forme d'une liste de successeurs, modélisée sous
+forme d'un tableau de pointeurs structure \textit{noeud} représentant la liste
+des noeuds du graphe. La structure \textit{noeud} contient un tableau de
+pointeurs de structure \textit{noeud} qui représente la liste des noeuds voisins.
+\\
+\newline Les deux structures sont détaillées comme suit : 
+\\
+Structure graphe :
+\begin{itemize}	
+\item \textbf{nombre\_Noeud} : un entier représentant le nombre de noeuds du graphe.
+\item \textbf{liste\_noeud}  : un tableau de pointeurs de structure \textit{noeud}, contenant les noeuds du graphe.
+\end{itemize}
+\vspace{1em}
+Structure noeud :
+\begin{itemize}
+\item \textbf{label}   		: une chaîne de caractères contenant le label du noeud.
+\item \textbf{id}    	     	: un entier pour identifier le noeud, il correspond à son indice dans le tableau des noeuds du graphe.
+\item \textbf{nombre\_Voisin} : un entier représentant le nombre de voisins du noeud.
+\item \textbf{cout}          : si le noeud est un successeur, il représente le coût associé, sinon c'est 0 par défaut.
+\item \textbf{voisin}        : un tableau de pointeurs de structure \textit{noeud}, contenant la liste des voisins de chaque noeud.
+\end{itemize}
+
+\vspace{1em}
+\noindent{}
+Pour permettre au contrôleur de manipuler le graphe, nous avons
+implémenté les fonctions suivantes :
+
+\begin{itemize}
+\item \textbf{void ajouter\_Noeud (struct graph* graph, char* label)} : permet de créer un noeud de nom label, et de le rajouter dans le graphe.
+
+\item \textbf{void ajouter\_Lien ( struct graph* graph, char* label1, char* label2, int cout)} : permet de rajouter le noeud de label1 comme successeur du noeud label2 et vis versa, avec ajout du coût de la liaison. 
+
+\item  \textbf{void supprimer\_Lien (struct graph* graph, char*label1, char*label2)} : supprime le noeud label1 de la liste des voisins du noeud label2 et vis versa.
+ 
+\item \textbf{void deconnecter\_Routeur(struct graph* graph, char*label)} : supprime la liste des voisins du noeud label, et le supprime de la liste des voisins des autres noeuds.
+
+\item \textbf{void modifier\_cout(struct graph* graph, char*label1, char*label2, int cout)} : met à jour le coût entre le noeud label1 et le noeud label2.
+\item \textbf{void show\_Topology(struct graph* graph)} : affiche la topologie du réseau sur la sortie standard. 
+\item \textbf{void sauvegarder\_Topology(struct graph* graph, char* nom\_fichier)} : sauvegarde la topologie dans un fichier dont on spécifie le nom.
+\end{itemize}
+

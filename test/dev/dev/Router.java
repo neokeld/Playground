@@ -90,7 +90,6 @@ public class Router {
 	    Router router = new Router(); 
 	    int port;
 	    String id;
-	    //port = 1800; 
 	    id = args[0];
 	    router.launch(id,router);  
 	}

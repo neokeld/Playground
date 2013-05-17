@@ -56,7 +56,7 @@ public class Router {
 	try{
 	  
 	    ServerSocket ss = new ServerSocket(port);
-	    Socket controlerSocket = new Socket(/*controllerAd*/ "localhost" ,controllerPort);
+	    Socket controlerSocket = new Socket(controllerAd,controllerPort);
 	    controllerInfo.addSocket(controlerSocket);
 	    controlerIn = new BufferedReader(new InputStreamReader(controlerSocket.getInputStream()));
 	    controlerOut = new PrintWriter(controlerSocket.getOutputStream(),true);
@@ -242,8 +242,8 @@ public class Router {
 		if(!alreadyConnected.contains(ri.getId())){
 		    alreadyConnected.add(ri.getId());
 		    System.out.println(ri.getId()+" "+ ri.getPort());
-		    Socket s = new Socket("localhost", ri.getPort());
-		    //Socket s = new Socket(ri.getIP(), ri.getPort());
+		    //Socket s = new Socket("localhost", ri.getPort());
+		    Socket s = new Socket(ri.getIP(), ri.getPort());
 		    ri.addSocket(s);
 		    this.sendMessage("link id "+this.id+"*",ri.getId());
 		    System.out.println("---------");
@@ -265,37 +265,33 @@ public class Router {
 			    line = lect.readLine();
 			    String words[] = line.split(" ");
 			    if(!line.equals("")) {
-				switch (words[0]){
-				case "router-port":
+				if(words[0].equals("router-port"))
 				    this.port = Integer.parseInt(words[2]);
-				    break;
-				case "controller-address":
+				
+				else if(words[0].equals("controller-address"))
 				    this.controllerAd = this.StringToInetAddress(words[2]);
-				    break;
-				case "controller-port":
+				
+				else if(words[0].equals("controller-port"))
 				    this.controllerPort = Integer.parseInt(words[2]);
-				    break;
-				case "controller-update-interval":
+				    
+				else if(words[0].equals("controller-update-interval"))
 				    this.controllerUpdateInterval = Integer.parseInt(words[2]);
-				    break;
-				case "router-update-interval":
+				
+				else if(words[0].equals("router-update-interval"))
 				    this.routerUpdateInterval = Integer.parseInt(words[2]);
-				    break;
-				case "default-ttl-value":
+				    
+				else if(words[0].equals("default-ttl-value"))
 				    this.ttlValue = Integer.parseInt(words[2]);
-				    break;
-				case "default-ping-packet-count":
+				    
+				else if(words[0].equals("default-ping-packet-count"))
 				    this.defaultPingPacketCount = Integer.parseInt(words[2]);
-				    break;
-				case "default-packet-timeout-value":
+				    
+				else if(words[0].equals("default-packet-timeout-value"))
 				    this.defaultPacketTimeoutValue = Integer.parseInt(words[2]);
-				    break;
-				case "default-dv-timeout-value":
+				    
+				else if(words[0].equals("default-dv-timeout-value"))
 				    this.defaultDVTimeoutValue = Integer.parseInt(words[2]);
-				    break;
-				default:
-				    break;
-				}
+				
 			    }
 			}
 	}

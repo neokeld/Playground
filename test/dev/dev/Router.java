@@ -20,7 +20,7 @@ public class Router {
     private BufferedReader controlerIn; 
     private int nbRouters=0; 
     private List<RouterInfo> alreadyConnectedTo;
-    private List<RouterInfo> routers;
+    public List<RouterInfo> routers;
     public List<Integer> listId;
     public List<String> alreadyConnected;
     public String id;
@@ -63,7 +63,7 @@ public class Router {
 	    routerControler(controlerOut,controlerIn,id,port);
 	    new ControllerThread(controlerSocket,router);
 	    new Commandes(router); 
-	    //new PeriodicVector(router,routerUpdateInterval);
+	    new PeriodicVector(router,routerUpdateInterval);
 	    printWelcome(port,this.id);
 	    while (true){
 		new RouterThread(ss.accept(),router,Router.SERVER,new RouterInfo());
@@ -188,6 +188,7 @@ public class Router {
     public void delRouters(){
 	System.out.println("delRouters");
 	sendAll("bye");
+	alreadyConnected.clear();
 	routers.clear();
     }
     
@@ -323,12 +324,11 @@ public class Router {
 	    vector = "vector ["+routers.get(0).getId()+","+routers.get(0).getCost();
 	    if(routers.size() >  1){
 		for(int i = 1; i < routers.size() ; i++)
-		    vector += "; "+routers.get(i).getId()+","+routers.get(i).getCost();
-		
-		vector += "]*";
-		
+		    vector += "; "+routers.get(i).getId()+","+routers.get(i).getCost();		
 	    }
+	    vector += "]*";
 	}
+	System.out.println("construct "+vector);
 	return vector;
     }
     
@@ -339,15 +339,21 @@ public class Router {
 	    {
 		String dest = st.nextToken();
 		String cost = st.nextToken();
-		if(idDes.contains(dest))
+		if(idDes.contains(dest) && dest.equals(this.id))
 		    this.compareCost(dest,idSender,Integer.parseInt(cost));
 		else{
 		    idDes.add(dest);
-		    this.cost.add(Integer.parseInt(cost));
-		    idNext.add(idSender);
+		    if(dest.equals(this.id)){
+			idNext.add("-");
+			this.cost.add(0);
+		    }
+		    else{
+			idNext.add(idSender);
+			this.cost.add(Integer.parseInt(cost));
+		    }
 		}
 	    }
-	this.afficherRouteTable();
+	//this.afficherRouteTable();
 	
     }
     
@@ -356,26 +362,41 @@ public class Router {
 	for(int i = 0; i < routers.size() ; i++){
 	    
 	    idDes.add(routers.get(i).getId());
-	    cost.add(routers.get(i).getCost());    
-	    if(routers.get(i).getId().equals(this.id))
+	    
+	    if(routers.get(i).getId().equals(this.id)){
 		idNext.add("-");
-	    else
+		cost.add(0);    
+	    }
+	    else{
+		cost.add(routers.get(i).getCost());    
 		idNext.add(routers.get(i).getId());
+	    }
 	}	
     }
     
     private void compareCost(String iDDes,String idSender,int senderCost){
-	int oldCost = 0 ;
+	int oldCost = 16;
 	int newCost = senderCost ;
+	int index = 0;
 	for(int i = 0; i < idDes.size() ; i++){
 	    if(idDes.get(i).equals(iDDes)){
 		oldCost = cost.get(i);
+		index = i;
 	    }
 	    if(idDes.get(i).equals(idSender))
 		newCost += cost.get(i);
-	}	
+	}
+	if( newCost < oldCost){
+	    idDes.remove(index);
+	    cost.remove(index);
+	    idNext.remove(index);
+	    
+	    idDes.add(iDDes);
+	    idNext.add(idSender);
+	    cost.add(senderCost);
+	}
     }
-    private void afficherRouteTable(){
+    public void afficherRouteTable(){
 	for(int i = 0; i < idDes.size() ; i++){
 	    System.out.println("idDes "+idDes.get(i)+"\tidNext "+idNext.get(i)+"\tCost "+cost.get(i));
 	}

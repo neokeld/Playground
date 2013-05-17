@@ -171,6 +171,7 @@ class RouterThread implements Runnable
 	      
 	      else if(split[0].equals("vector")){
 		  router.routeTableUpdater(message,connectedRI.getId());
+		  System.out.println("thread "+message);
 	      }
 	      else {
 		  int index = message.lastIndexOf('R');

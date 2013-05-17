@@ -16,8 +16,6 @@ class PeriodicVector implements Runnable{
 	this.routerUpdateInterval = routerUpdateInterval;
 	t = new Thread(this);
 	t.start();
-
-	
     }
     
 
@@ -28,7 +26,6 @@ class PeriodicVector implements Runnable{
 	    while(end - start < routerUpdateInterval){
 		end = System.currentTimeMillis()/1000;
 	    }
-	    //System.out.println(router.contructVector());
 	    router.sendAll(router.constructVector());
 	    start = end;
 	}

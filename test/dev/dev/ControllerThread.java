@@ -32,7 +32,7 @@ class ControllerThread  implements Runnable{
 		    String cmd = in.readLine();
 		    int ind1, ind2;
 		    String op, subop;
-		    
+		    //List<RouterInfo> routersBis = new ArrayList();
 		    ind1 = cmd.indexOf(' ');
 		    op = cmd.substring(0, ind1);
 		    if(op.equalsIgnoreCase("neighborhood"))
@@ -79,14 +79,23 @@ class ControllerThread  implements Runnable{
 						    }
 						routerInfos.addIP(InetAddress.getByAddress(ipByte));
 						router.addRouter(routerInfos);
-						
+						//routersBis.add(routerInfos);
 						//infos[i].s = new Socket(InetAddress.getByAddress(ipByte), Integer.parseInt(neighborInfo[1]));
 					    }
 				    }
+				    /*for(RouterInfo ri: router.routers){
+					if(!router.routersBis.contains(ri))
+					    router.delRouter(ri.getId());
+				    }
+				    
+				    for(RouterInfo ri: routersBis){
+					if(!router.routers.contains(ri))
+					    router.delRouter(ri.getId());
+					    }*/
 				    router.connect();
 				    router.initRouteTable();
-				    
-				    thread.sleep(router.controllerUpdateInterval);
+				    //router.afficherRouteTable();
+				    thread.sleep(router.controllerUpdateInterval*1000);
 				    
 				}
 			    else

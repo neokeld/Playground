@@ -293,8 +293,8 @@ public class Router {
 	    for(RouterInfo ri: routers){
 		if(!alreadyConnected.contains(ri.getId())){
 		    alreadyConnected.add(ri.getId());
-		    //Socket s = new Socket("localhost", ri.getPort());
 		    Socket s = new Socket(ri.getIP(), ri.getPort());
+		    //Socket s = new Socket("localhost", ri.getPort());
 		    ri.addSocket(s);
 		    System.out.println(id+" added");
 		    this.sendMessage("link id "+this.id+"*",ri.getId());

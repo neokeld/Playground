@@ -101,7 +101,7 @@ static void app(void)
 	{
 	    /* nouveau client */
 	    SOCKADDR_IN csin = { 0 };
-	    socklen_t sinsize = sizeof csin;
+	    socklen_t sinsize = sizeof(csin);
 	    int csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
 	    if(csock == SOCKET_ERROR)
 	    {
@@ -397,12 +397,17 @@ int router_poll(struct graph* graph, Client * router, const char *c, Client * cl
 	    /* MaJ de la liste */
 	    neighbors_list(graph, router->name, router->neighbors_list, clients);
 	    /* Cas 1 : le routeur connaît ses voisins (ils n'ont pas changé) */
-	    if (strcmp(oldlist, router->neighbors_list) == 0)
-		write_client(router->sock, "neighborhood ok*", clients);
+	    if (strcmp(oldlist, router->neighbors_list) == 0) {
+	      printf("write client : %s\n", "neighborhood ok*");
+	      write_client(router->sock, "neighborhood ok*\n", clients);
+		printf("écrit\n");
+	    }
 	    else
 	    {
-		/* Cas 2 : il faut redonner au routeur ses voisins */
-		write_client(router->sock, router->neighbors_list, clients);
+	      /* Cas 2 : il faut redonner au routeur ses voisins */
+	      printf("write client : %s\n", router->neighbors_list);
+	      write_client(router->sock, router->neighbors_list, clients);
+	      printf("écrit\n");
 	    }
 	    free(oldlist);
 	}

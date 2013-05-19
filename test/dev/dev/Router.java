@@ -21,6 +21,7 @@ public class Router {
     private int nbRouters=0; 
     private List<RouterInfo> alreadyConnectedTo;
     public List<RouterInfo> routers;
+    public List<RouterInfo> traceRoute;
     public List<Integer> listId;
     public List<String> alreadyConnected;
     public String id;
@@ -36,22 +37,22 @@ public class Router {
     public int defaultDVTimeoutValue;
 
 
-    private List<String> idDes;
-    private List<String> idNext;
-    private List<Integer> cost;
+    public List<String> idDes;
+    public List<String> idNext;
+    public List<Integer> cost;
 
 
-    private void launch(String id, Router router){
+    private void launch(String id, Router router, String path){
 	this.id = id;
 	controllerInfo = new RouterInfo();
-	router.parseConfigFile("testRouter.cfg");
+	router.parseConfigFile(path);
 	listId = new ArrayList<Integer>();
 	idDes = new ArrayList<String>();
 	idNext = new ArrayList<String>();
 	cost = new ArrayList<Integer>();
 	alreadyConnected = new ArrayList<String>();
-	alreadyConnected.add(this.id);
 	routers = new ArrayList();
+	traceRoute = new ArrayList();
 	alreadyConnectedTo = new ArrayList();	
 	try{
 	  
@@ -61,10 +62,10 @@ public class Router {
 	    controlerIn = new BufferedReader(new InputStreamReader(controlerSocket.getInputStream()));
 	    controlerOut = new PrintWriter(controlerSocket.getOutputStream(),true);
 	    routerControler(controlerOut,controlerIn,id,port);
+	    printWelcome(port,this.id);
 	    new ControllerThread(controlerSocket,router);
 	    new Commandes(router); 
 	    new PeriodicVector(router,routerUpdateInterval);
-	    printWelcome(port,this.id);
 	    while (true){
 		new RouterThread(ss.accept(),router,Router.SERVER,new RouterInfo());
 	    }
@@ -80,6 +81,7 @@ public class Router {
 	     if(split[0].equalsIgnoreCase("greeting")){
 		 this.id = split[1].substring(0,split[1].length()-1); 
 	     }
+	     alreadyConnected.add(this.id);
 	 }catch(Exception e){ e.printStackTrace();}
 	 
      }
@@ -91,7 +93,7 @@ public class Router {
 	    int port;
 	    String id;
 	    id = args[0];
-	    router.launch(id,router);  
+	    router.launch(id,router,args[1]);  
 	}
 	catch (Exception e) { }
     }
@@ -124,14 +126,39 @@ public class Router {
 	    }
 	}
     }
-    
-    
+
+    public String getNext(String destination){
+	int next = 0;
+	for(int i = 0; i < idDes.size() ; i++){
+	    if(idDes.get(i).equals(destination)){
+		next = i;
+	    }
+	}
+	return idNext.get(next);
+    }
+
     public void sendMessage(String message,String id)
     {
-	PrintWriter out;
+	PrintWriter out = null;
+	int next = 0;
+	String destination;
+	boolean found = false;
+	for(int i = 0; i < idDes.size() ; i++){
+	    if(idDes.get(i).equals(id)){
+		next = i;
+		found = true;
+	    }
+	}
+	if(!found)
+	    destination = id;
+	else
+	    destination = idNext.get(next);
+
 	for(int i = 0; i < routers.size() ; i++){
-	    if(routers.get(i).getId().equals(id)){
-		out = new PrintWriter(routers.get(i).getOutputStream(),true);
+	    if(routers.get(i).getId().equals(destination)){
+		try{
+		    out = new PrintWriter(routers.get(i).getOutputStream(),true);
+		}catch(NullPointerException e){System.out.println("Null pointer "+routers.get(i).getId());}
 		if (out != null) {
 		    out.println(message);
 		    out.flush(); 
@@ -139,19 +166,28 @@ public class Router {
 	    }
 	}
     }
-
+    
 
     public void sendPaquet(String message,String idDestination)
     {
+	int next = 0;
+	for(int i = 0; i < idDes.size() ; i++){
+	    if(idDes.get(i).equals(idDestination)){
+		next = i;
+		
+	    }
+	}
+
 	for(int i = 0; i < routers.size() ; i++){
-	    if(routers.get(i).getId().equals(idDestination)){
+	    if(routers.get(i).getId().equals(idNext.get(next))){
 		routers.get(i).getRouterThread().sendPaquet(message,ttlValue,idDestination);
 	    }
 	}
+
     }
     
 
-    synchronized public void delRouter(String id){
+    public void delRouter(String id){
 	for(int i = 0; i < routers.size() ; i++){
 	    if(routers.get(i).getId().equals(id)){
 		try{
@@ -184,8 +220,7 @@ public class Router {
 	}
     }
      
-    public void delRouters(){
-	System.out.println("delRouters");
+    synchronized public void delRouters(){
 	sendAll("bye");
 	alreadyConnected.clear();
 	routers.clear();
@@ -216,13 +251,19 @@ public class Router {
     public void sendPing(String id)
     {
 	boolean found = false;
-	for(int i = 0; i < routers.size() ; i++){
-	    if(routers.get(i).getId().equals(id)){
+	int next = 0;
+	for(int i = 0; i < idDes.size() ; i++){
+	    if(idDes.get(i).equals(id)){
+		next = i;
 		found = true;
-		routers.get(i).getRouterThread().sendPing(this.ttlValue);
 	    }
 	}
-	
+
+	for(int i = 0; i < routers.size() ; i++){
+	    if(routers.get(i).getId().equals(idNext.get(next))){
+		routers.get(i).getRouterThread().sendPing(this.ttlValue,id);
+	    }
+	}
 	if(!found)
 	    System.out.println("\terror: unknown destination !");
     }
@@ -236,15 +277,25 @@ public class Router {
 	return false;
     }
 
+    public RouterInfo findRouters(String id){
+	for(int i = 0; i < routers.size() ; i++){
+	    if(routers.get(i).getId().equals(id)){
+		return routers.get(i);
+	    }
+	}
+	return null;
+    }
+
+
     public void connect(){
 	try{
 	    for(RouterInfo ri: routers){
 		if(!alreadyConnected.contains(ri.getId())){
 		    alreadyConnected.add(ri.getId());
-		    System.out.println(ri.getId()+" "+ ri.getPort());
 		    Socket s = new Socket("localhost", ri.getPort());
 		    //Socket s = new Socket(ri.getIP(), ri.getPort());
 		    ri.addSocket(s);
+		    System.out.println(id+" added");
 		    this.sendMessage("link id "+this.id+"*",ri.getId());
 		    System.out.println("---------");
 		    new RouterThread(s,this,Router.CLIENT,ri);
@@ -317,64 +368,61 @@ public class Router {
       }
     
     
+    
     public String constructVector(){
 	String vector = "";
-	if(!routers.isEmpty()){
-	    vector = "vector ["+routers.get(0).getId()+","+routers.get(0).getCost();
-	    if(routers.size() >  1){
-		for(int i = 1; i < routers.size() ; i++)
-		    vector += "; "+routers.get(i).getId()+","+routers.get(i).getCost();		
+	if(!idDes.isEmpty() && idDes.size() >  1){
+	    vector = "vector ["+idDes.get(1)+","+cost.get(1);
+	    if(idDes.size() >  2){
+		for(int i = 2; i < idDes.size() ; i++){
+		    vector += "; "+idDes.get(i)+","+cost.get(i);		
+		}
 	    }
 	    vector += "]*";
 	}
-	System.out.println("construct "+vector);
 	return vector;
     }
-    
+
     synchronized public void routeTableUpdater(String Vector, String idSender){	
+	int costNext = 0;
 	StringTokenizer st = new StringTokenizer(Vector," *,;[]");
-	System.out.println(st.nextToken());
-	while(st.hasMoreTokens())
-	    {
-		String dest = st.nextToken();
-		String cost = st.nextToken();
-		if(idDes.contains(dest) && dest.equals(this.id))
-		    this.compareCost(dest,idSender,Integer.parseInt(cost));
-		else{
-		    idDes.add(dest);
-		    if(dest.equals(this.id)){
-			idNext.add("-");
-			this.cost.add(0);
-		    }
-		    else{
-			idNext.add(idSender);
-			this.cost.add(Integer.parseInt(cost));
-		    }
+	if(st.hasMoreTokens())
+	    st.nextToken();
+	while(st.hasMoreTokens()){
+	    String dest = st.nextToken();
+	    String cost = st.nextToken();
+	    if(idDes.contains(dest) && !dest.equals(this.id))
+		this.compareCost(dest,idSender,Integer.parseInt(cost));
+	    else if (!dest.equals(this.id)){
+		idDes.add(dest);
+		for(int i = 0; i < idDes.size() ; i++){
+		    if(idDes.get(i).equals(idSender))
+			costNext = this.cost.get(i);
 		}
+		idNext.add(idSender);
+		this.cost.add(Integer.parseInt(cost)+costNext);
 	    }
-	//this.afficherRouteTable();
-	
+	}
     }
     
-    public void initRouteTable(){
-	
+   synchronized  public void initRouteTable(){
+	idDes.clear();
+	idNext.clear();
+	cost.clear();
+	idDes.add(this.id);   
+	idNext.add("-");
+	cost.add(0);    
 	for(int i = 0; i < routers.size() ; i++){
 	    
-	    idDes.add(routers.get(i).getId());
+	    idDes.add(routers.get(i).getId());   
+	    cost.add(routers.get(i).getCost());    
+	    idNext.add(routers.get(i).getId());
 	    
-	    if(routers.get(i).getId().equals(this.id)){
-		idNext.add("-");
-		cost.add(0);    
-	    }
-	    else{
-		cost.add(routers.get(i).getCost());    
-		idNext.add(routers.get(i).getId());
-	    }
 	}	
     }
     
     private void compareCost(String iDDes,String idSender,int senderCost){
-	int oldCost = 16;
+	int oldCost = 0;
 	int newCost = senderCost ;
 	int index = 0;
 	for(int i = 0; i < idDes.size() ; i++){
@@ -382,8 +430,10 @@ public class Router {
 		oldCost = cost.get(i);
 		index = i;
 	    }
-	    if(idDes.get(i).equals(idSender))
+	    if(idDes.get(i).equals(idSender)){
 		newCost += cost.get(i);
+		
+	    }
 	}
 	if( newCost < oldCost){
 	    idDes.remove(index);
@@ -392,7 +442,7 @@ public class Router {
 	    
 	    idDes.add(iDDes);
 	    idNext.add(idSender);
-	    cost.add(senderCost);
+	    cost.add(newCost);
 	}
     }
     public void afficherRouteTable(){

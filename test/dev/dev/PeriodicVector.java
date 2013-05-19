@@ -23,7 +23,7 @@ class PeriodicVector implements Runnable{
 	long start = System.currentTimeMillis()/1000;
 	while(true){
 	    long end = System.currentTimeMillis()/1000;
-	    while(end - start < routerUpdateInterval){
+	    while(end - start < routerUpdateInterval*2){
 		end = System.currentTimeMillis()/1000;
 	    }
 	    router.sendAll(router.constructVector());

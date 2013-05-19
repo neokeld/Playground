@@ -46,11 +46,12 @@ class ControllerThread  implements Runnable{
 			    if(subop.equalsIgnoreCase("ok"))
 				{
 				    // TODO : Okay =D
-				    System.out.println("Ok");
+				    //stem.out.println("Ok");
 				}
 			    else if(subop.equalsIgnoreCase("newlist"))
 				{
-				    router.delRouters();
+				    //System.out.println("controller "+cmd);
+				    //router.delRouters();
 				    ind1 = cmd.indexOf('[');
 				    ind2 = cmd.indexOf(']');
 				    String nData[] = cmd.substring(ind1+1, ind2).split("; ");
@@ -60,8 +61,13 @@ class ControllerThread  implements Runnable{
 				    if(ind1 != ind2 - 1){
 					for(int i = 0 ; i < nbNeighbor ; i++)
 					    {
+						boolean found = false;
 						RouterInfo routerInfos = new RouterInfo();
 						String neighborInfo[] = nData[i].split(",");
+						if(router.findRouter(neighborInfo[0])){
+						    routerInfos = router.findRouters(neighborInfo[0]);
+						    found = true;
+						}
 						routerInfos.addid(neighborInfo[0]);
 						routerInfos.addCost(Integer.parseInt(neighborInfo[1]));
 						
@@ -78,28 +84,24 @@ class ControllerThread  implements Runnable{
 							ipByte[j] = (byte)val;
 						    }
 						routerInfos.addIP(InetAddress.getByAddress(ipByte));
-						router.addRouter(routerInfos);
+						if(!found)
+						    router.addRouter(routerInfos);
 						//routersBis.add(routerInfos);
 						//infos[i].s = new Socket(InetAddress.getByAddress(ipByte), Integer.parseInt(neighborInfo[1]));
 					    }
 				    }
-				    /*for(RouterInfo ri: router.routers){
-					if(!router.routersBis.contains(ri))
-					    router.delRouter(ri.getId());
-				    }
-				    
-				    for(RouterInfo ri: routersBis){
-					if(!router.routers.contains(ri))
-					    router.delRouter(ri.getId());
-					    }*/
+				    //router.afficherRouters();
 				    router.connect();
 				    router.initRouteTable();
 				    //router.afficherRouteTable();
-				    thread.sleep(router.controllerUpdateInterval*1000);
+				    
+				   
 				    
 				}
 			    else
 				throw new Exception("Vector invalide");
+			    thread.sleep(router.controllerUpdateInterval*1000);
+			    //thread.sleep(5000);
 			}
 		}
 		catch(Exception e){
